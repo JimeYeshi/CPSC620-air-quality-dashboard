@@ -53,11 +53,24 @@ def main():
                 unsafe_allow_html=True)
     
     st.markdown("""
-    **Welcome to the Air Quality Analysis Dashboard!** 
-    
-    This dashboard analyzes air quality data from an Italian city monitoring station. 
+    **Welcome to the Air Quality Analysis Dashboard!** This dashboard analyzes air quality data from an Italian city monitoring station. 
     The dataset includes various air pollutants and weather variables collected over time.
     """)
+    
+    # --- Sidebar for Filters (THIS IS YOUR NEW FEATURE) ---
+    st.sidebar.header("Chart Filters")
+    
+    # List of pollutants we want to allow filtering on
+    pollutant_options = ['CO(GT)', 'PT08.S1(CO)', 'NMHC(GT)', 'C6H6(GT)', 'PT08.S2(NMHC)', 
+                       'NOx(GT)', 'PT08.S3(NOx)', 'NO2(GT)', 'PT08.S4(NO2)', 'PT08.S5(O3)']
+    
+    selected_pollutant = st.sidebar.selectbox(
+        "Select Pollutant for Distribution Chart:",
+        options=pollutant_options,
+        index=0 # Default to CO(GT)
+    )
+    # --- End of Sidebar ---
+    
     
     # Load and cache data
     @st.cache_data
@@ -85,7 +98,9 @@ def main():
     
     if display_metrics:
         # Display metrics in cards
-        cols = st.columns(len(display_metrics))
+        
+        # --- FIX 1: 'display_modules' -> 'display_metrics' ---
+        cols = st.columns(len(display_metrics)) 
         
         for i, (metric_name, metric_values) in enumerate(display_metrics.items()):
             with cols[i]:
@@ -124,11 +139,12 @@ def main():
     # Additional visualizations
     col3, col4 = st.columns(2)
     
+    # --- THIS PLOT IS NOW DYNAMIC (THIS IS YOUR SECOND CHANGE) ---
     with col3:
-        st.subheader("CO Distribution")
-        co_dist_plot = plot_pollutant_distribution(df, 'CO(GT)')
-        if co_dist_plot:
-            st.pyplot(co_dist_plot)
+        st.subheader(f"{selected_pollutant} Distribution")
+        pollutant_dist_plot = plot_pollutant_distribution(df, selected_pollutant)
+        if pollutant_dist_plot:
+            st.pyplot(pollutant_dist_plot)
     
     with col4:
         st.subheader("NOx(GT) vs Sensor Value")
@@ -140,7 +156,10 @@ def main():
     
     # Correlation heatmap
     st.subheader("Correlation Heatmap")
+    
+    # --- FIX 2: '.df' -> 'df' ---
     corr_plot = plot_correlation_heatmap(df)
+    
     if corr_plot:
         st.pyplot(corr_plot)
 
