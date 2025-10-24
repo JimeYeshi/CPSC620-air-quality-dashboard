@@ -21,7 +21,8 @@ def load_data(file_path="data/AirQualityUCI.csv"):
     """
     try:
         # Load data with semicolon separator
-        df = pd.read_csv(file_path, sep=';')
+        df = pd.read_csv(file_path, sep=';',decimal=",",           # many columns use comma decimals
+        na_values=[-200, "-200", " -200"])
         
         # Remove empty columns (the dataset has trailing semicolons)
         df = df.dropna(axis=1, how='all')
@@ -55,8 +56,9 @@ def clean_data(df):
     df_clean = df_clean.replace(-200, np.nan)
     
     # Convert date and time columns
-    df_clean['Date'] = pd.to_datetime(df_clean['Date'], format='%d/%m/%Y')
-    df_clean['Time'] = pd.to_datetime(df_clean['Time'], format='%H.%M.%S').dt.time
+    df_clean['Date'] = pd.to_datetime(df_clean['Date'], format='%d/%m/%Y', errors='coerce')
+    df_clean['Time'] = pd.to_datetime(df_clean['Time'], format='%H.%M.%S', errors='coerce'
+    ).dt.time
     
     # Create datetime column for easier time series analysis
     # Only create DateTime for rows where both Date and Time are valid
